@@ -1,9 +1,16 @@
 package com.example.snsapplication
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.net.Uri.encode
 import android.os.Bundle
+import android.util.Base64
+import android.util.Base64.encode
+import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -13,6 +20,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.android.synthetic.main.activity_login.*
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.util.*
+import java.util.Base64 as UtilBase64
+
 
 class LoginActivity : AppCompatActivity() {
     var auth: FirebaseAuth? = null
@@ -30,8 +42,23 @@ class LoginActivity : AppCompatActivity() {
         }
         var gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.default_web_client_id)).requestEmail().build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
+        printHashKey()
     }
-
+    fun printHashKey() {
+        try {
+            val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+            for (signature in info.signatures) {
+                val md = MessageDigest.getInstance("SHA")
+                md.update(signature.toByteArray())
+                val hashKey = String(Base64.encode(md.digest(), 0))
+                Log.i("TAG", "printHashKey() Hash Key: $hashKey")
+            }
+        } catch (e: NoSuchAlgorithmException) {
+            Log.e("TAG", "printHashKey()", e)
+        } catch (e: Exception) {
+            Log.e("TAG", "printHashKey()", e)
+        }
+    }
     fun GoogleLogin(){
         var SignInIntent = googleSignInClient?.signInIntent
         startActivityForResult(SignInIntent, GOOGLE_LOGIN_CODE)
@@ -101,4 +128,5 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
         }
     }
+
 }
