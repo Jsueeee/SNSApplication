@@ -11,11 +11,19 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import com.facebook.AccessToken
+import com.facebook.CallbackManager
+import com.facebook.CallbackManager.Factory.*
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -30,6 +38,7 @@ class LoginActivity : AppCompatActivity() {
     var auth: FirebaseAuth? = null
     var googleSignInClient : GoogleSignInClient? = null
     var GOOGLE_LOGIN_CODE = 9001
+    var callbackManager : CallbackManager? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -40,9 +49,14 @@ class LoginActivity : AppCompatActivity() {
         google_sign_in_button.setOnClickListener {
             GoogleLogin()
         }
+        facebook_login_button.setOnClickListener {
+            //1단계
+            facebookLogin()
+        }
         var gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.default_web_client_id)).requestEmail().build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
-        printHashKey()
+        //printHashKey()
+        callbackManager = create()
     }
     fun printHashKey() {
         try {
@@ -63,9 +77,39 @@ class LoginActivity : AppCompatActivity() {
         var SignInIntent = googleSignInClient?.signInIntent
         startActivityForResult(SignInIntent, GOOGLE_LOGIN_CODE)
     }
+    fun facebookLogin(){
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "email"))//프로필 이미지와 이메일 요청
+        LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult>{
+            override fun onSuccess(result: LoginResult?) {
+                //로그인이 성공하면 페이스북 데이터를 firebase에 넘기는 코드
+                //2단계 (성공했을 때)
+                handleFacebookAccessToken(result?.accessToken)
+            }
+            override fun onCancel() {
+            }
+            override fun onError(error: FacebookException?) {
+            }
+        })
+    }
+    fun handleFacebookAccessToken(token : AccessToken?){
+        var credential = FacebookAuthProvider.getCredential(token?.token!!)
+        auth?.signInWithCredential(credential)?.addOnCompleteListener {
+                task ->
+            if (task.isSuccessful) {
+                //3단계
+                //이 응답값을 받아서 페이지로 이동시킴
+                //Login
+                moveMainPage(task.result?.user)
+            }else{
+                //error message
+                Toast.makeText(this, task.exception?.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        callbackManager?.onActivityResult(requestCode, resultCode, data)
         if(requestCode == GOOGLE_LOGIN_CODE){
             var result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
             if(result?.isSuccess!!){
