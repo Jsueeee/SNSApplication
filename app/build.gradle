@@ -33,7 +33,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.google.firebase:firebase-auth:16.0.5'
-    implementation 'com.google.firebase:firebase-storage:16.0.5'//사진을 업로드할 수 있는 storage 추가
+    implementation 'com.google.firebase:firebase-storage:16.0.5'//사진을 업로드할 수 있는 storage 추가 //firebase에서 storage 사용 설정 해주어야 함.
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
     implementation 'androidx.fragment:fragment-ktx:1.2.5'
     testImplementation 'junit:junit:4.12'
