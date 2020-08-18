@@ -133,5 +133,7 @@ class AddPhotoActivity : AppCompatActivity() {
                 finish()
             }
         }*/
+
+        //firebae 이동, database 설정, 규칙 탭, allow read, write: if request.auth.uid != null;로 수정
     }
 }
