@@ -8,9 +8,11 @@ import android.os.Bundle
 import android.widget.Toast
 import com.example.snsapplication.R
 import com.example.snsapplication.navigation.model.ContentDTO
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_add_photo.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -67,12 +69,41 @@ class AddPhotoActivity : AppCompatActivity() {
 
         /*
         업로드 방식에는 두가지가 있다.
-        1. Promise method
+        1. Promise method (구글 권장)
         2. Callback method
         */
 
+        //Promise method
+        storageRef?.putFile(photoUri!!)?.continueWithTask {
+            task : Task<UploadTask.TaskSnapshot> ->
+            return@continueWithTask storageRef.downloadUrl
+        }?.addOnSuccessListener { uri ->
+            //데이터모델 만들기
+            var contentDTO = ContentDTO()
 
+            //Insert downloadUrl of image
+            contentDTO.imageUri = uri.toString() //content url을 넣어줌
 
+            //Insert uid of user
+            contentDTO.uid = auth?.currentUser?.uid
+
+            //Insert userId
+            contentDTO.userId = auth?.currentUser?.email
+
+            //Insert explain of content
+            contentDTO.explain = addPhoto_edit_explain.text.toString()
+
+            //Insert timestamp
+            contentDTO.timestamp = System.currentTimeMillis()
+
+            firestore?.collection("images")?.document()?.set(contentDTO)
+
+            setResult(Activity.RESULT_OK) //정상적으로 닫혔다는 flag를 넘겨줌
+
+            finish()
+        }
+
+        /*
         //Callback method
         storageRef?.putFile(photoUri!!)?.addOnSuccessListener {
             //이미지 업로드가 완료 됐으면 이미지 주소를 받아온다
@@ -101,6 +132,6 @@ class AddPhotoActivity : AppCompatActivity() {
 
                 finish()
             }
-        }
+        }*/
     }
 }
