@@ -58,6 +58,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         bottom_navigation.setOnNavigationItemSelectedListener(this)//리스너연결
         //사진 경로를 가져올 수 있는 권한 요청
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)//manifest->android
+
+        //메인화면이 뜨면 detailview fragment가 메인 화면으로 뜰 수 있도록 세팅
+        bottom_navigation.selectedItemId = R.id.action_home
     }
 
 }
