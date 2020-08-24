@@ -17,7 +17,7 @@
             android:layout_height="35dp"/>
         <TextView
             android:text="User name"
-            android:id="@+id/detialviewitem_profile_textview"
+            android:id="@+id/detailviewitem_profile_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
