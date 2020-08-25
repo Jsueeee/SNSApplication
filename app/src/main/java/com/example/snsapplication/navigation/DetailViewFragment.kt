@@ -19,6 +19,7 @@ class DetailViewFragment : Fragment(){
 
     //DB에 접근할 수 있도록
     var firestore : FirebaseFirestore? = null
+    var uid : String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,6 +29,7 @@ class DetailViewFragment : Fragment(){
         var view = LayoutInflater.from(activity).inflate(R.layout.fragment_detail, container, false)
         //onCreateView 안에서 초기화 해주어야 함.
         firestore = FirebaseFirestore.getInstance()
+        var uid = FirebaseAuth.getInstance().currentUser?.uid
 
         view.detailviewfragment_recyclerview.adapter = DetailViewRecyclerViewAdapger()
         view.detailviewfragment_recyclerview.layoutManager = LinearLayoutManager(activity) //화면 세로 배치
@@ -86,6 +88,17 @@ class DetailViewFragment : Fragment(){
             //Like 버튼에 이벤트 달아주기
             viewholder.detailviewitem_favorit_imageview.setOnClickListener{
                 favoriteEvent(p1)
+            }
+            //내 uid가 포함되어 있을 경우
+            if (contentDTOs!![p1].favorites.containsKey(uid)){
+                //좋아요 버튼이 클릭된 경우
+                //꽉 찬 하트
+                viewholder.detailviewitem_favorit_imageview.setImageResource(R.drawable.ic_favorite)
+            }else{
+                //포함되지 않을 경우
+                //좋아요 버튼이 클릭되지 않은 경우
+                //비어있는 하트
+                viewholder.detailviewitem_favorit_imageview.setImageResource(R.drawable.ic_favorite_border)
             }
         }
         fun favoriteEvent(position : Int){
