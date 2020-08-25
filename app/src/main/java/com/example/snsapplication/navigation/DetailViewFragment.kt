@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.snsapplication.R
 import com.example.snsapplication.navigation.model.ContentDTO
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_detail.view.*
 import kotlinx.android.synthetic.main.item_detail.view.*
@@ -81,6 +82,32 @@ class DetailViewFragment : Fragment(){
 
             //ProfileImage 매핑
             Glide.with(p0.itemView.context).load(contentDTOs!![p1].imageUri).into(viewholder.detailviewitem_profile_image)
+
+
+        }
+        fun favoriteEvent(position : Int){
+            //내가 선택한 컨텐츠의 uid를 받아와서 좋아요해주는 이벤트
+            //document안에 내가 선택한 uid 값을 넣어주면 됨.
+            var tsDoc = firestore?.collection("images")?.document(contentUidList[position])
+            //데이터 입력 위한 트랜잭션 불러오기
+            firestore?.runTransaction { transaction ->
+                var uid = FirebaseAuth.getInstance().currentUser?.uid
+                //트랜잭션의 데이터를 contentDTO로 캐스팅
+                var contentDTO = transaction.get(tsDoc!!).toObject(ContentDTO::class.java)
+                //좋아요 버튼 이미 클릭되어 있을 경우/ 아닌 경우 구분해주기
+                if(contentDTO!!.favorites.containsKey(uid)){
+                    //버튼 클릭을 취소하기
+                    contentDTO?.favoriteCount = contentDTO?.favoriteCount -1
+                    contentDTO?.favorites.remove(uid)
+
+                }else{
+                    //버튼 클릭
+                    contentDTO?.favoriteCount = contentDTO?.favoriteCount +1
+                    contentDTO?.favorites[uid!!] = true
+                }
+                //트랜잭션을 다시 서버로 돌려주기
+                transaction.set(tsDoc, contentDTO)
+            }
         }
     }
 }
