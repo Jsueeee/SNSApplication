@@ -83,7 +83,10 @@ class DetailViewFragment : Fragment(){
             //ProfileImage 매핑
             Glide.with(p0.itemView.context).load(contentDTOs!![p1].imageUri).into(viewholder.detailviewitem_profile_image)
 
-
+            //Like 버튼에 이벤트 달아주기
+            viewholder.detailviewitem_favorit_imageview.setOnClickListener{
+                favoriteEvent(p1)
+            }
         }
         fun favoriteEvent(position : Int){
             //내가 선택한 컨텐츠의 uid를 받아와서 좋아요해주는 이벤트
