@@ -46,6 +46,8 @@ class DetailViewFragment : Fragment(){
             firestore?.collection("images")?.orderBy("timestamp")?.addSnapshotListener{querySnapshot, firebaseFirestoreException ->
                 contentDTOs.clear()//받자마자 contentDTOs 값 초기화
                 contentUidList.clear()
+                //sign out을 누르면 크러쉬 발생 -> firestore의 스냅샷에서 에러 -> 아래 코드 추가로 안전성 높임
+                if(querySnapshot == null)   return@addSnapshotListener
                 //for문 돌려서 snapshot에 들어오는 데이터 하나씩 읽음
                 for(snapshot in querySnapshot!!.documents){
                     var item = snapshot.toObject(ContentDTO::class.java) //캐스팅
