@@ -100,6 +100,15 @@ class DetailViewFragment : Fragment(){
                 //비어있는 하트
                 viewholder.detailviewitem_favorit_imageview.setImageResource(R.drawable.ic_favorite_border)
             }
+            //프로필 이미지 클릭하면 상대방 유저 정보로 이동
+            viewholder.detailviewitem_profile_image.setOnClickListener{
+                var fragment = UserFragment()
+                var bundle = Bundle()
+                bundle.putString("destinationUid", contentDTOs[p1].uid)
+                bundle.putString("userId", contentDTOs[p1].userId)//이메일값
+                fragment.arguments = bundle
+                activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.main_content, fragment)?.commit()
+            }
         }
         fun favoriteEvent(position : Int){
             //내가 선택한 컨텐츠의 uid를 받아와서 좋아요해주는 이벤트
