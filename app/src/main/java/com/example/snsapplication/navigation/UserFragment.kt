@@ -31,6 +31,9 @@ class UserFragment : Fragment(){
     var uid : String? = null
     var auth : FirebaseAuth? = null
     var currentUserUid : String? = null//내 계정인지 상대방 계정인지 알기 위함
+    companion object {
+        var PICK_PROFILE_FROM_ALBUM = 10 //static 선언
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,9 +70,31 @@ class UserFragment : Fragment(){
         }
 
         fragmentView?.account_recyclerview?.adapter = UserFragmentRecyclerViewAdapter()
-        fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(activity!!, 3)//칸에 3개씩 뜰 수 있도록
+        fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(requireActivity(), 3)//칸에 3개씩 뜰 수 있도록
+
+        fragmentView?.account_iv_profile?.setOnClickListener{
+            var photoPickerIntent = Intent(Intent.ACTION_PICK)
+            photoPickerIntent.type = "image/*"
+            activity?.startActivityForResult(photoPickerIntent, PICK_PROFILE_FROM_ALBUM)
+        }
+
+        getProfileImage()
+
         return fragmentView
     }
+
+    fun getProfileImage(){
+        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            //코드의 안전성을 위하여
+            if(documentSnapshot == null) return@addSnapshotListener
+            if(documentSnapshot.data != null){
+                //이미지 받아오기
+                var url = documentSnapshot?.data!!["image"]
+                Glide.with(requireActivity()).load(url).apply(RequestOptions().circleCrop()).into(fragmentView?.account_iv_profile!!)
+        }
+        }
+    }
+
     //recyclerview에 사용할 adapter
     inner class UserFragmentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
         var contentDTOs : ArrayList<ContentDTO> = arrayListOf() //contentDTOs를 담을 array 선언

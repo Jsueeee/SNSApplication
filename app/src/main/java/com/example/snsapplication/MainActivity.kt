@@ -1,6 +1,7 @@
 package com.example.snsapplication
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,8 @@ import androidx.core.content.ContextCompat
 import com.example.snsapplication.navigation.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
@@ -78,6 +81,24 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         //메인화면이 뜨면 detailview fragment가 메인 화면으로 뜰 수 있도록 세팅
         bottom_navigation.selectedItemId = R.id.action_home
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == UserFragment.PICK_PROFILE_FROM_ALBUM && requestCode == Activity.RESULT_OK){
+            //사진을 선택했을 경우 처리해주는 부분
+            var imageUri = data?.data
+            var uid = FirebaseAuth.getInstance().currentUser?.uid
+            var storageRef = FirebaseStorage.getInstance().reference.child("userProfileImages").child(uid!!)
+            storageRef.putFile(imageUri!!).continueWithTask {
+                return@continueWithTask storageRef.downloadUrl
+            }.addOnSuccessListener { uri ->
+                var map = HashMap<String, Any>()
+                map["image"] = uri.toString()
+                FirebaseFirestore.getInstance().collection("profileImages").document(uid).set(map)
+            }
+        }
     }
 
 }
