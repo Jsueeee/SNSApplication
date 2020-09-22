@@ -14,6 +14,7 @@ import com.example.snsapplication.navigation.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -72,6 +73,20 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         toolbar_title_image.visibility = View.VISIBLE
     }
 
+    //특정 디바이스에 전송하고 싶을 때는 기기마다 토큰 아이디를 받아와야 한다.
+    //토큰 생성
+    fun registerPushToken(){
+        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener {
+            task ->
+            val token = task.result?.token
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            val map = mutableMapOf<String, Any>()
+            map["pushToken"] = token!!
+
+            FirebaseFirestore.getInstance().collection("pushtokens").document(uid!!).set(map)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -81,6 +96,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
         //메인화면이 뜨면 detailview fragment가 메인 화면으로 뜰 수 있도록 세팅
         bottom_navigation.selectedItemId = R.id.action_home
+        registerPushToken()//로그인이 되자마자 바로 db에 저장될 수 있도록
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
