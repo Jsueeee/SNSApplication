@@ -51,6 +51,7 @@ class commentActivity : AppCompatActivity() {
     fun commentAlarm(destinationUid : String, message : String){
         var alarmDTO = AlarmDTO()
         alarmDTO.userId = FirebaseAuth.getInstance().currentUser?.email
+        alarmDTO.kind = 1
         alarmDTO.uid = FirebaseAuth.getInstance().currentUser?.uid
         alarmDTO.timestamp = System.currentTimeMillis()
         alarmDTO.message = message
