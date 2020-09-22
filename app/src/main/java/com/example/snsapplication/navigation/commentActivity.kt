@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.snsapplication.R
+import com.example.snsapplication.navigation.model.AlarmDTO
 import com.example.snsapplication.navigation.model.ContentDTO
+import com.google.api.Billing
 import com.google.api.Distribution
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -21,10 +23,12 @@ import java.net.ConnectException
 
 class commentActivity : AppCompatActivity() {
     var contentUid : String? = null
+    var destinationUid : String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
         contentUid = intent.getStringExtra("contentUid") //intent에서 넘어온 스트링값 세팅
+        destinationUid = intent.getStringExtra("destinationUid")
 
         //comment리사이클러뷰랑 어댑터 연결
         comment_recyclerview.adapter = CommentRecyclerViewAdapter()
@@ -40,8 +44,17 @@ class commentActivity : AppCompatActivity() {
             //comments에 document 만들어주고 set 하면 채팅 메시지 쌓임
             FirebaseFirestore.getInstance().collection("images").document(contentUid!!).collection("comments").document().set(comment)
 
+            commentAlarm(destinationUid!!, comment_edit_message.text.toString())
             comment_edit_message.setText("")
         }
+    }
+    fun commentAlarm(destinationUid : String, message : String){
+        var alarmDTO = AlarmDTO()
+        alarmDTO.userId = FirebaseAuth.getInstance().currentUser?.email
+        alarmDTO.uid = FirebaseAuth.getInstance().currentUser?.uid
+        alarmDTO.timestamp = System.currentTimeMillis()
+        alarmDTO.message = message
+        FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
     }
     inner class CommentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
