@@ -19,6 +19,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.snsapplication.LoginActivity
 import com.example.snsapplication.MainActivity
 import com.example.snsapplication.R
+import com.example.snsapplication.navigation.model.AlarmDTO
 import com.example.snsapplication.navigation.model.ContentDTO
 import com.example.snsapplication.navigation.model.FollowDTO
 import com.google.firebase.auth.FirebaseAuth
@@ -149,6 +150,7 @@ class UserFragment : Fragment(){
                 followDTO = FollowDTO()
                 followDTO!!.followerCount = 1
                 followDTO!!.followers[currentUserUid!!] = true
+                followerAlarm(uid!!) //최초로(followDTO가 null 일때) 누가 팔로우 할 때도 알림 오도록
 
                 transaction.set(tsDocFollower, followDTO!!)
                 return@runTransaction
@@ -161,10 +163,20 @@ class UserFragment : Fragment(){
                 //안했을 경우
                 followDTO!!.followerCount = followDTO!!.followerCount +1
                 followDTO!!.followers[currentUserUid!!] = true//나의 uid 추가
+                followerAlarm(uid!!)
             }
             transaction.set(tsDocFollower, followDTO!!)
             return@runTransaction
         }
+    }
+    fun followerAlarm(destinationUid : String){
+        var alarmDTO = AlarmDTO()
+        alarmDTO.destinationUid = destinationUid
+        alarmDTO.userId = auth?.currentUser?.uid
+        alarmDTO.kind = 2
+        alarmDTO.uid = auth?.currentUser?.email
+        alarmDTO.timestamp = System.currentTimeMillis()
+        FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
     }
 
     fun getProfileImage(){
