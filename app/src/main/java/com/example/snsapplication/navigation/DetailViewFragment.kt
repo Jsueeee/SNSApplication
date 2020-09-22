@@ -1,5 +1,6 @@
 package com.example.snsapplication.navigation
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -111,7 +112,14 @@ class DetailViewFragment : Fragment(){
                 fragment.arguments = bundle
                 activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.main_content, fragment)?.commit()
             }
+            //말풍선 클릭하면 commentActivity가 띄워지도록
+            viewholder.detailviewitem_comment_imageview.setOnClickListener{v->
+                var intent = Intent(v.context, commentActivity::class.java)
+                intent.putExtra("contentUid", contentUidList[p1]) //내가 선택한 이미지의 uid값이 담기게 된다
+                startActivity(intent)
+            }
         }
+
         fun favoriteEvent(position : Int){
             //내가 선택한 컨텐츠의 uid를 받아와서 좋아요해주는 이벤트
             //document안에 내가 선택한 uid 값을 넣어주면 됨.
