@@ -22,6 +22,7 @@ import com.example.snsapplication.R
 import com.example.snsapplication.navigation.model.AlarmDTO
 import com.example.snsapplication.navigation.model.ContentDTO
 import com.example.snsapplication.navigation.model.FollowDTO
+import com.example.snsapplication.navigation.util.FcmPush
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthSettings
 import com.google.firebase.firestore.FirebaseFirestore
@@ -177,6 +178,9 @@ class UserFragment : Fragment(){
         alarmDTO.uid = auth?.currentUser?.email
         alarmDTO.timestamp = System.currentTimeMillis()
         FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
+
+        var message = auth?.currentUser?.email + getString(R.string.alarm_follow)
+        FcmPush.instance.sendMessage(destinationUid, "Instagram", message)
     }
 
     fun getProfileImage(){
