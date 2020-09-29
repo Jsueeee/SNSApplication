@@ -20,7 +20,7 @@ import java.util.*
 class AddPhotoActivity : AppCompatActivity() {
     var PICK_IMAGE_FROM_ALBUM = 0
     var storage : FirebaseStorage? = null
-    var photoUri : Uri? = null
+    var photoUri : Uri? = null //image Uri
     var auth : FirebaseAuth? = null
     var firestore : FirebaseFirestore? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +48,7 @@ class AddPhotoActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == PICK_IMAGE_FROM_ALBUM){
-            if(requestCode == Activity.RESULT_OK){
+            if(resultCode == Activity.RESULT_OK){
                 //사진을 선택했을 때 이미지의 경로가 여기로 넘어옴
                 photoUri = data?.data //photoUri에 경로 담아주기
                 addPhoto.setImageURI(photoUri) //이미지뷰에 선택한 이미지 보여주기
@@ -65,13 +65,15 @@ class AddPhotoActivity : AppCompatActivity() {
         var timestamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         var imageFileName = "IMAGE_" + timestamp + "_.png"
 
-        var storageRef = storage?.reference?.child(imageFileName)
+        //storage reference -> image upload
+        var storageRef = storage?.reference?.child("images")?.child(imageFileName)
 
         /*
         업로드 방식에는 두가지가 있다.
         1. Promise method (구글 권장)
         2. Callback method
         */
+
 
         //Promise method
         storageRef?.putFile(photoUri!!)?.continueWithTask {
@@ -101,7 +103,7 @@ class AddPhotoActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK) //정상적으로 닫혔다는 flag를 넘겨줌
 
             finish()
-        }
+        }//firebae 이동, database 설정, 규칙 탭, allow read, write: if request.auth.uid != null;로 수정
 
         /*
         //Callback method
@@ -134,6 +136,6 @@ class AddPhotoActivity : AppCompatActivity() {
             }
         }*/
 
-        //firebae 이동, database 설정, 규칙 탭, allow read, write: if request.auth.uid != null;로 수정
+
     }
 }

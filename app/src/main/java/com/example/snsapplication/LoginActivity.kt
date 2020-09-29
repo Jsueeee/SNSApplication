@@ -148,6 +148,7 @@ class LoginActivity : AppCompatActivity() {
                 task ->
                     if (task.isSuccessful) {
                         //Creating a user account
+                        //성공하면 메인 페이지로
                         moveMainPage(task.result?.user)
                     }else if(!(task.exception?.message.isNullOrEmpty())){
                         //error message
@@ -173,6 +174,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+    //로그인이 성공하면 다음 페이지로 넘어가는 함수
     fun moveMainPage(user: FirebaseUser?){
         if(user != null){
             startActivity(Intent(this, MainActivity::class.java))

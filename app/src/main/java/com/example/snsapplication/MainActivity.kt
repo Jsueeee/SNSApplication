@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == UserFragment.PICK_PROFILE_FROM_ALBUM && requestCode == Activity.RESULT_OK){
+        if(requestCode == UserFragment.PICK_PROFILE_FROM_ALBUM && resultCode == Activity.RESULT_OK){
             //사진을 선택했을 경우 처리해주는 부분
             var imageUri = data?.data
             var uid = FirebaseAuth.getInstance().currentUser?.uid
